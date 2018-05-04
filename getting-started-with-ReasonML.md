@@ -39,7 +39,9 @@ Reason # 3 + 4;
 
 - [Node.js 代码](https://reasonml.github.io/docs/en/quickstart-javascript.html)：
 
-        ```bsb -init my-first-app -theme basic-reason```
+        `
+        bsb -init my-first-app -theme basic-reason
+        `
 
 - [Web开发（React）](https://reasonml.github.io/reason-react/docs/en/installation.html)：
 
