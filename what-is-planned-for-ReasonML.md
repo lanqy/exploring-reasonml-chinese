@@ -16,7 +16,7 @@
 Js.log({js|äöü|js});
 ```
 
-将来，ReasonML 可能会增加对 OCaml 的更多支持。他们可以将字符串视为 UTF-8，并使用工具函数访问字形集群和代码点。编译为 JavaScript 会带来挑战（例如访问字符/单位），因为 JavaScript 基本上是 UTF-16。
+    将来，ReasonML 可能会增加对 OCaml 的更多支持。他们可以将字符串视为 UTF-8，并使用工具函数访问字形集群和代码点。编译为 JavaScript 会带来挑战（例如访问字符/单位），因为 JavaScript 基本上是 UTF-16。
 
 - 长期来看，ReasonML 通过 [OCaml 的代数效应](http://ocamllabs.io/doc/effects.html)还为多核代码提供了一个引人入胜的故事。
 
