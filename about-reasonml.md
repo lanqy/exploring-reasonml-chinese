@@ -1,6 +1,6 @@
 # 什么是 ReasonML ?
 
-本章简要介绍了 Facebook 的新编程语言 [ReasonML](https://reasonml.github.io/)
+> 本章简要介绍了 Facebook 的新编程语言 [ReasonML](https://reasonml.github.io/)
 
 ## 什么是 ReasonML ?
 
@@ -11,3 +11,18 @@ ReasonML 基于 OCaml，许多人可以互换使用这两个名称。下图显�
 ![这就是 ReasonML 如何适应OCaml生态系统。](4a1823ac61589e61eae453cfe9421d70809f2fba.svg)
 
 目前，ReasonML 的默认编译目标是 JavaScript（浏览器和 Node.js ）。
+
+这就是ReasonML代码的样子：
+
+```ocaml
+
+type color = Red | Green | Blue;
+
+let stringOfColor(c) =>
+    switch (c) {
+        | Red => "Red"
+        | Green => "Green"
+        | Blue => "Blue"
+    };
+
+```
