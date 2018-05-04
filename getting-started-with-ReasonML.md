@@ -39,11 +39,11 @@ Reason # 3 + 4;
 
 - [Node.js 代码](https://reasonml.github.io/docs/en/quickstart-javascript.html)：
 
-`bsb -init my-first-app -theme basic-reason`
+        `bsb -init my-first-app -theme basic-reason`
 
 - [Web开发（React）](https://reasonml.github.io/reason-react/docs/en/installation.html)：
 
-`bsb -init my-react-app -theme react`
+        `bsb -init my-react-app -theme react`
 
 ## 重要提示：将 OCaml 转换为 ReasonML
 
