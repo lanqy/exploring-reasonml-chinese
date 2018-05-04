@@ -51,4 +51,5 @@ let stringOfColor(c) =>
 - 其核心是具有全功能类型系统的函数式编程语言。但它也支持面向对象和可变状态。
 - 它可以编译为字节码，快速的 native 代码或 JavaScript。
 - 编译成JavaScript很快。引用博客文章 “ [Messenger.com 现在已经 50％ 转化为 Reason](https://reasonml.github.io/blog/2017/09/08/messenger-50-reason.html) ”：
+
   > 代码库的 Reason 部分的完全重建是〜2s（几百个文件），增量构建（标准）平均<100ms。BuckleScript 作者估计，构建系统在当前情况下应该扩展到几十万个文件。
