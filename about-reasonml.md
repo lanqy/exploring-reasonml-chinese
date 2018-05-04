@@ -50,6 +50,20 @@ let stringOfColor(c) =>
 - Facebook本身在几个项目中使用它（例如Flow）。
 - 其核心是具有全功能类型系统的函数式编程语言。但它也支持面向对象和可变状态。
 - 它可以编译为字节码，快速的 native 代码或 JavaScript。
-- 编译成JavaScript很快。引用博客文章 “ [Messenger.com 现在已经 50％ 转化为 Reason](https://reasonml.github.io/blog/2017/09/08/messenger-50-reason.html) ”：
+- 编译成 JavaScript 很快。引用博客文章 “ [Messenger.com 现在已经 50％ 转化为 Reason](https://reasonml.github.io/blog/2017/09/08/messenger-50-reason.html) ”：
 
   > 代码库的 Reason 部分的完全重建是〜2s（几百个文件），增量构建（标准）平均<100ms。BuckleScript 作者估计，构建系统在当前情况下应该扩展到几十万个文件。
+
+## 改进 OCaml
+
+ReasonML 团队还致力于改善 OCaml 生态系统：
+
+- 更好的工具（测试，文档，编辑器支持等）。
+- 与 JavaScript 更好地互操作。 ReasonML-to-JavaScript 编译器已经非常快速并且生成相对可读的代码。
+- 更好的标准库（在 OCaml 的这个领域中有相当数量的竞争，没有明确的赢家）。
+
+## 结论
+
+如果您清理了 JavaScript 并将其转换为静态类型的函数式编程语言，ReasonML感觉就是您想要的。我在 ReasonML 中对 JSX 很矛盾 - 它有优点和缺点。我很高兴 ReasonML 不会重新发明，并严格基于已建立的 OCaml。
+
+OCaml 的实用主义意味着你没有得到一些更加奇特的功能特性（例如 Haskell ），但它也导致快速编译，高效的代码和体面的错误消息。
