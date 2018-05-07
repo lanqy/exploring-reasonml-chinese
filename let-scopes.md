@@ -1,6 +1,6 @@
 # let 绑定与作用域
 
->在本章中，我们将着眼于如何在 ReasonML 中引入新的变量和范围。
+> 在本章中，我们将着眼于如何在 ReasonML 中引入新的变量和范围。
 
 ### 普通的 let 绑定
 
@@ -19,7 +19,7 @@ let x: int = 123;
 
 ### 重新定义变量
 
-ReasonML不会阻止您重新定义变量：
+ReasonML 不会阻止您重新定义变量：
 
 ```ocaml
 # let x = 1;
@@ -69,7 +69,7 @@ print_string(x); /* hello */
 
 ```ocaml
 let x = { print_string("hi"); 123}; /* hi */
-print_int(x); /* 123 */ 
+print_int(x); /* 123 */
 ```
 
 另外一个例子：
