@@ -255,3 +255,142 @@ let result = switch tuple {
     | (true, x) => x
 }; /* result == true */
 ```
+
+#### `as` 运算符
+
+`as` 运算符也可用于 `switch` 模式：
+
+```ocaml
+let tuple  = (8, (5,9));
+let result = switch tuple {
+    | (0, _) => (0, (0, 0))
+    | (_, (x, _) as t) => (x, t)
+}; /* result == (5 (5, 9)) */
+```
+
+#### 选择模式
+
+在子模式中使用替代方案如下所示。
+
+```ocaml
+switch someTuple {
+    | (0,1 | 2 | 3) => "first branch"
+    | _ => "second branch"
+};
+```
+
+其他选择也可以在顶层使用:
+
+```ocaml
+switch "Monday" {
+| "Monday"
+| "Tuesday"
+| "Wednesday"
+| "Thursday"
+| "Friday" => "weekday"
+| "Saturday"
+| "Sunday" => "weekend"
+| day => "Illegal value: " ++ day
+};
+/* Result: "weekday" */
+```
+
+#### 条件分支
+
+分支机构的警卫（条件）是一个 `switch` 特定的功能：它们在模式之后，并且在关键字之前。我们来看一个例子：
+
+```ocaml
+let tuple = (3, 4);
+let max = switch tuple {
+    | (x, y) when x > y => x
+    | (_, y) => y
+}; /* max == 4 */
+
+```
+
+第一个分支仅在条件 `x > y` 为真时评估。
+
+### `if` 表达式
+
+ReasonML 的 `if` 表达式如下所示（ `else` 可以省略）：
+
+```ocaml
+if («bool») «thenExpr» else «elseExpr»;
+```
+
+例如：
+
+```ocaml
+# let bool =  true;
+let bool: bool = true;
+# let boolStr = if (bool) "true" else "false";
+let boolStr: string = "true";
+```
+
+鉴于作用域块也是表达式，以下两个if表达式是等价的：
+
+```ocaml
+if (bool) "true" else "false"
+if (bool) {"true"} else {"false"}
+```
+
+事实上，`refmt` 把前者的表达式作为后者的表达式进行格式化打印。
+
+`then` 表达式和 `else` 表达式必须具有相同的类型。
+
+```ocaml
+Reason # if (true) 123 else "abc";
+Error: This expression has type string
+but an expression was expected of type int
+```
+
+#### 省略 `else` 分支
+
+你可以省略 `else` 分支 - 以下两个表达式是等价的。
+
+```ocaml
+if (b) expr else ()
+if (b) expr
+```
+
+鉴于两个分支必须具有相同的类型，expr 必须具有类型单元（其唯一元素是 ()）。
+
+例如，print_string() 的计算结果为 ()，以下代码工作：
+
+```ocaml
+# if (true) print_string("hello\n");
+hello
+- : unit = ()
+```
+
+相反，这不起作用：
+
+```ocaml
+# if (true) "abc";
+Error: This expression has type string
+but an expression was expected of type unit
+( 错误：此表达式具有字符串类型 但类型单位预计表达式 )
+```
+
+### 三元运算符 (_?_:_)
+
+ReasonML 还为您提供三元运算符作为 `if` 表达式的替代方法。以下两个表达式是等价的。
+
+```ocaml
+if (b) expr1 else expr2
+
+b ? expr1 : expr2
+```
+
+以下两个表达式也是相同的。甚至很漂亮 - 将前者作为后者进行打印。
+
+```ocaml
+switch (b) {
+    | true => expr1
+    | false => expr2
+};
+
+b ? expr1 : expr2;
+```
+
+我没有发现三元运算符运算符在 ReasonML 中非常有用：它在 C 语言类似的语言中的用途是具有 `if` 语句的表达式版本。但是，如果已经是 ReasonML 中的表达式。
