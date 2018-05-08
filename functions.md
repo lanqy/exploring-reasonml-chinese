@@ -225,3 +225,141 @@ let f: (unit) => int = <fun>;
 为什么 ReasonML 没有空函数？ 这是由于 ReasonML 始终执行部分应用程序（稍后详细解释）：如果不提供所有函数的参数，则会从剩余参数获得一个新函数。 因此，如果实际上根本没有提供任何参数，那么 `func()` 将与 `func` 相同，而且实际上也不会调用 `func`。
 
 ### 解构函数参数
+
+在变量绑定到值的地方，可以使用解构。也就是说，它也适用于参数定义。让我们看看一个添加元组的元素的函数：
+
+```ocaml
+let addComponents = ((x, y)) => x + y;
+let tuple = (3, 4);
+addComponents(tuple); /* 7 */
+```
+
+围绕 `x，y` 的双括号表明 `addComponents` 是一个具有单个参数的函数，它是一个元素是 `x` 和 `y` 的元组。它不是具有两个参数 `x` 和 `y` 的函数。它的类型是：
+
+```ocaml
+addComponents: ((int, int)) => int
+```
+
+当涉及到类型注解时，您可以注解组件：
+
+```ocaml
+# let addComponents = ((x: int, y: int)) => x + y;
+let addComponents: ((int, int)) => int = <fun>;
+```
+或者你可以注解整个参数：
+
+```ocaml
+# let addComponents = ((x, y): (int, int)) => x + y;
+let addComponents: ((int, int)) => int = <fun>;
+```
+
+### 标签参数
+
+到目前为止，我们只使用位置参数：实际参数在调用的位置决定了它绑定的形式参数。
+
+但是 ReasonML 也支持标签参数。这里，标签用于将实际参数与形式参数相关联。
+
+作为一个例子，我们来看看使用标签参数的 `add` 的版本：
+
+```ocaml
+let add = (~x, ~y) => x + y;
+
+add(~x:7, ~y=9); /* 16 */
+
+```
+
+在这个函数定义中，我们对标签 `~x` 和参数 `x` 使用了相同的名称。您也可以使用不同的名称，例如 `~x` 为标签，`op1` 为参数：
+
+```ocaml
+/* 类型推导 */
+let add = (~x as op1, ~y as op2) =>
+    op1 + op2;
+
+/* 指定类型 */
+let add = (~x as op1: int, ~y as op2: int) => 
+    op1 + op2;
+
+```
+
+在调用时，您可以缩写 `~x = x`，只需 `~x`：
+
+```ocaml
+let x = 7;
+let y = 9;
+add(~x, ~y);
+```
+
+标签的一个很好的功能是可以按任意顺序提及标签参数：
+
+```ocaml
+# add(~x=3, ~y=4);
+- : int = 7
+# add(~y=4,~x=3);
+- : int = 7
+```
+
+#### 函数类型与标签参数的兼容性
+
+有一个不幸的警告是能够以任何顺序提及带标签的参数：只有当标签按照相同的顺序被提及时，功能类型才是兼容的。
+
+考虑以下三个函数：
+
+```ocaml
+let add = (~x, ~y) => x + y;
+let addxy = (add: ((~x: int, ~y: int) => int)) => add(5, 2);
+let addyx = (add: ((~y: int, ~x: int) => int)) => add(5, 2);
+```
+
+`addxy` 与 `add` 按预期工作：
+
+```ocaml
+# addxy(add);
+- : int = 7
+```
+
+但是，使用 `addyx`，我们会遇到错误，因为标签的顺序是错误的：
+
+```ocaml
+# addyx(add);
+错误：此表达式有类型 (~x: int，~y: int)=> int 
+但预期的表达类型 (~y: int，~x: int)=> int
+```
+
+### 可选参数
+
+在 ReasonML中，只有标签参数可以是可选的。在下面的代码中，`x` 和 `y` 都是可选的。
+
+```ocaml
+let add = (~x=?, ~y=?, ()) =>
+    switch (x, y) {
+        | (Some(x'), Some(y')) => x' + y'
+        | (Some(x'), None) => x'
+        | (None, Some(y')) => y'
+        | (None, None) => 0
+    };
+```
+让我们看看相对复杂的代码做了什么。
+
+为什么 `()` 作为最后一个参数？这在下一节中解释。
+
+`switch` 表达式做了什么？如果您将参数声明为可选参数，则始终具有 `option(t)` 类型，其中t是实际值所具有的任何类型。`option` 是一个变体（在[单独的章节](variants.md)中进行解释）。现在，我将简要预览一下。`option` 的定义是：
+
+```ocaml
+type option('a) = None | Some('a);
+```
+
+它的用法如下：
+
+- 省略 `~x` 和 `x` 将被绑定到 `None`。
+- 为 `~x` 提供值 `123` ，`x` 将绑定到 `Some(123)`。
+
+换句话说，`option` 会包装值，而示例中的 `switch` 表达式会打开它们。
+
+#### 使用可选参数，您至少需要一个位置参数
+
+为什么 `add` 在最后有一个类型为 `unit` 的参数（如果你愿意的话，它是一个空参数）？
+
+```ocaml
+let add = (~x=?, ~y=?, ()) =>
+    ...
+```
