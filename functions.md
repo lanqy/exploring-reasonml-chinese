@@ -551,3 +551,52 @@ let add: (~x: int, ~y: int) => int = <fun>;
 ```
 
 也就是说，标签不会在这里强制下单。这意味着部分应用程序对于标签​​更具多功能性，因为您可以部分应用任何标记的参数，而不仅仅是最后一个。
+
+#### 部分应用和可选参数
+
+可选参数如何?以下版本的 `add` 只有可选参数:
+
+```ocaml
+# let add = (~x=0, ~y=0, ()) => x + y;
+let add: (~x: int=?, ~y: int=?, unit) => int = <fun>;
+```
+
+如果仅提到标签 `〜x` 或仅标签 `〜y`，则部分应用程序与以前一样工作，但有一点不同：`unit` 类型附加位置参数也必须填写。
+
+```ocaml
+# add(~x=3);
+- : (~y: int=?, unit) => int = <fun>
+# add(~y=3);
+- : (~x: int=?, unit) => int = <fun>
+```
+
+但是，一旦您提到了位置参数，就不再有部分应用程序;默认值现在填充:
+
+```ocaml
+# add(~x=3, ());
+- : int = 3
+# add(~y=3, ());
+- : int = 3
+```
+
+即使你采取一个或两个中间步骤，`()` 始终是评估的最终信号。一个中间步骤如下所示。
+
+```ocaml
+# let plus5 = add(~x=5);
+let plus5: (~y: int=? unit) => int = <fun>;
+# plus5(());
+- : int = 5
+```
+
+两个中间步骤：
+
+```ocaml
+# let plus5 = add(~x=5);
+let plus5: (~y: int=?, unit) => int = <fun>;
+# let result8 = plus5(~y=5);
+let result8: (unit) => int = <fun>;
+# result8(());
+- : int = 8
+```
+
+### 柯里（高级）
