@@ -852,14 +852,46 @@ prefix operator|	–
 . .( .[ .{	| –
 [ ] (array index)	| –
  #···	| –
-applications, assert, lazy	| left
+applications, assert, lazy	| 左关联
  --. (prefix)	| –
- **··· lsl lsr asr	 | right
- *··· /··· %··· mod land lor lxor	| left
-+··· -···	| left
-@··· ^···	| right
-=··· <··· >··· ❘··· &··· $··· !=	| left
-&&	| right
-❘❘	| right
+ **··· lsl lsr asr	 | 右关联
+ *··· /··· %··· mod land lor lxor	| 左关联
++··· -···	| 左关联
+@··· ^···	| 右关联
+=··· <··· >··· ❘··· &··· $··· !=	| 左关联
+&&	| 右关联
+❘❘	| 右关联
 if	| –
 let switch fun try	| –
+
+说明：
+
+- `op...` 表示 `op` 后跟其他操作符。
+- applications:函数应用程序、构造函数应用程序、标记应用程序。
+
+本表来源：Sect。 OCaml手册中的“[表达式]”(https://caml.inria.fr/pub/docs/manual-ocaml/expr.html)。
+
+#### 关联性何时重要？
+
+只要操作符不交换，关联性就很重要。使用交换操作符，操作数的顺序无关紧要。例如，加 (`+`) 是可交换的。但是，减号(`-`)是不可交换的。
+
+左关联意味着操作从左边分组。那么以下两个表达式是等价的：
+
+```ocaml
+x op y op z
+(x op y) op z
+```
+
+减号 (`-`) 是左关联的：
+
+```ocaml
+$ 3 - 2 - 1;
+- : int = 0
+```
+
+右关联意味着操作从右侧分组。那么以下两个表达式是等价的：
+
+```ocaml
+x op y op z
+x op (y op z)
+```
