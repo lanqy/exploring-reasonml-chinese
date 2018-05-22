@@ -853,7 +853,7 @@ prefix operator|	–
 [ ] (array index)	| –
  #···	| –
 applications, assert, lazy	| left
- - -. (prefix)	| –
+ --. (prefix)	| –
  **··· lsl lsr asr	 | right
  *··· /··· %··· mod land lor lxor	| left
 +··· -···	| left
