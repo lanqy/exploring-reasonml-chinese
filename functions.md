@@ -854,8 +854,8 @@ prefix operator|	–
  #···	| –
 applications, assert, lazy	| left
 - -. (prefix)	| –
-**··· lsl lsr asr	 | right
-*··· /··· %··· mod land lor lxor	| left
+ **··· lsl lsr asr	 | right
+ *··· /··· %··· mod land lor lxor	| left
 +··· -···	| left
 @··· ^···	| right
 =··· <··· >··· ❘··· &··· $··· !=	| left
