@@ -351,12 +351,10 @@ module FloatOps = {
   let (+) = (+.);
   let (*) = (*.);
 };
-
 let dist = (x, y) =>
   FloatOps.(
     sqrt((x * x) + (y * y))
-    );
-
+  );
 ```
 
 你是否真的应该在生产代码中做到这一点是值得商榷的。
