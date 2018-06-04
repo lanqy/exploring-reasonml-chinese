@@ -360,3 +360,479 @@ computeAreaPlus(tri); /* 7.5 */
 ```
 
 因此，我们成功地扩展了它的类型形状和函数 `computeArea()` 。
+
+## 最佳实践：正常变体与多态变体
+
+一般来说，您应该更喜欢正态变体而不是多变体变体，因为它们的效率稍高一些，并且可以实现更严格的类型检查。引用 OCaml 手册：
+
+> 多态变体虽然是类型安全的，但却导致了较弱的类型规则。也就是说，核心语言变体实际上做的不仅仅是确保类型安全，它们还检查您只使用声明的构造函数，检查数据结构中出现的所有构造函数都是兼容的，并且它们对它们的参数执行类型约束。
+
+
+然而，多态变体有一些明显的优势。如果在给定情况下有任何问题，则应使用多态变体：
+
+- 重用：构造函数（可能随代码处理它）对于多个变体很有用。例如，颜色的构造器就属于这个类别。
+- 解耦：构造函数用于多个位置，但不希望这些位置依赖于定义构造函数的单个模块。相反，您可以简单地使用构造函数而不用定义它。
+- 可扩展性：您期望稍后扩展一个变体。与本章前面的 `shapePlus` 是 `shape` 的扩展相似。
+- 简洁性：由于多态构造函数的全局名称空间，您可以使用它们而无需限定它们或打开它们的模块（请参阅下一小节）。
+- 使用没有事先定义的构造函数：您可以使用多态构造函数，而无需事先通过变体定义它们。这对于仅用于单个位置的丢弃类型偶尔很方便。
+
+值得庆幸的是，如果需要的话，从一个正常变体转向多态变体相对容易。
+
+## 简洁性：正常变体与多态变体
+
+我们来比较正常变体和多态变体的简洁性。
+
+对于常规变体 `bwNormal` ，您需要限定A行中的黑色（或打开其模块）：
+
+```ocaml
+module MyModule = {
+    type bwNormal = Black | White;
+
+    let getNameNormal(bw: bwNormal) =
+        switch bw {
+            | Black => "Black"
+            | White => "While"
+        };
+};
+
+print_string(MyModule.getNameNormal(MyModule.Black)) /* A */
+
+/* "Black" */
+
+```
+
+对于多态变体 bwPoly ，对于 A 中的黑色不需要进行限定：
+
+```ocaml
+module MyModule = {
+    type bwPoly = [ `Black | `White ];
+
+    let getNamePoly(bw: bwPoly) = 
+        switch bw {
+            | `Black => "Black"
+            | `White => "White"
+        };
+};
+
+print_string(MyModule.getNamePoly(`Black)); /* A */
+
+/* "Black" */
+
+```
+
+在这个例子中，不需要限定条件并没有太大的作用，但是如果你多次使用构造函数就很重要。
+
+## 防止使用多态变体的拼写错误
+
+多态变体的一个问题是，你会得到更少的关于拼写错误的警告，因为你可以在不定义它们的情况下使用构造函数。例如，在下面的代码中，`Green 在 A 行中拼写为 `Gren：
+
+```ocaml
+type rgb = [ `Red | `Green | `Blue ];
+let f = (x) => 
+    switch x {
+        | `Red => "Red"
+        | `Gren => "Green" /* A */
+        | `Blue => "Blue"
+    }
+
+    /* lef f: ([< `Blue | `Gren | `Red ]) => string = <fun>; */
+
+```
+
+如果为参数 `x` 添加类型注释，则会发出警告：
+
+```ocaml
+let f = (x: rgb) => 
+    switch x {
+        | `Red => "Red"
+        | `Gren => "Green"
+        | `Blue => "Blue"
+    };
+
+    /*
+    错误：此模式匹配 [? `Gren ] 
+    但预期与 rgb 类型的值匹配的模式 
+    第二种变体类型不允许使用 tag(s) `Gren
+    */
+```
+
+如果您从函数返回多态变量值，则也可以指定该函数的返回类型。但是这也增加了你的代码量，所以确保你真的受益。如果输入所有参数，则应该捕捉许多（如果不是大多数）问题。
+
+## （高级）
+
+> 以下所有部分都包含高级主题。
+
+#### 类型变量的类型约束
+
+在我们仔细研究多态变体的约束之前，我们首先需要了解类型变量的一般约束（前者是一种特殊情况）。
+
+在类型定义的末尾，可以有一个或多个类型约束。这些语法如下：
+
+```ocaml
+constraint «typeexpr» = «typeexpr»
+```
+
+这些约束用于改进前面类型定义中的类型变量。这是一个简单的例子：
+
+```ocaml
+type t('a) = 'a constraint 'a = int;
+```
+
+如何处理约束？在我们研究这个之前，我们先来了解 `unification` 以及它如何构建模式匹配。
+
+模式匹配沿着一个方向进行：一个没有变量的词用于填充另一个词中的变量。在下面的例子中，`Int(123) 是没有变量的术语，`Int(x) 是包含变量的术语：
+
+```ocaml
+switch(`Int(123)) {
+    | `Int(x) => print_int(x)
+}
+```
+
+`unification` 是模式匹配，可以在两个方向上工作：两个术语都可以有变量，并且双方的变量都被填充。作为示例，请考虑：
+
+```ocaml
+# type t('a, 'b) = ('a, 'b) constraint ('a, int) = (bool, 'b);
+type t('a, 'b) = ('a, 'b) constraint 'a = bool constraint 'b = int;
+```
+
+尽可能简化 ReasonML ：将等号两边变量的原始复杂约束转换为仅在左侧具有变量的两个简单约束。
+
+这是一个可以简化事物的例子，不再需要约束：
+
+```ocaml
+# type t('a, 'b) = 'c constraint 'c = ('a, 'b);
+type t('a, 'b) = ('a, 'b);
+```
+
+## 多态变体的类型约束
+
+我们在本章前面看到的类型约束实际上只是多态变量特有的类型约束。
+
+例如，以下两个表达式是等价的：
+
+```ocaml
+let x: [> `Red ] = `Red;
+let x: [> `Red] as 'a = `Red;
+```
+
+另一方面，以下两个类型表达式也是等价的（但不能在 let 绑定和参数定义中使用约束）：
+
+```ocaml
+[> `Red ] as 'a
+'a constraint 'a = [> `Red ]
+```
+
+也就是说，对于迄今为止我们使用的所有多态变体约束，总是存在一个隐式（隐藏）类型变量。我们可以看到，如果我们尝试使用这样的约束来定义类型 t ：
+
+```ocaml
+# type t = [> `Red ];
+错误:类型变量在此类型声明中未绑定。
+在类型[> `Red]中，作为变量的 'a 是未绑定的
+```
+
+我们如下解决这个问题。请注意由 ReaonML 计算​​出的最终类型。
+
+```ocaml
+# type t('a) = [> `Red ] as 'a;
+type t('a) = 'a constraint 'a = [> `Red ];
+```
+
+## 多态变体的上下界
+
+对于本章的其余部分，我们将多态变体的类型约束简称为类型约束或约束。
+
+类型约束包含以下任一个或两个：
+
+- 下界：指示类型必须至少包含哪些元素。例如：[> `Red | `Green] 接受所有包含构造函数 `Red 和 `Green 的类型。换句话说：作为一个集合，约束接受所有类型的超集。
+- 上界：指示类型最多必须包含的元素。例如：[< `Red | `Green] 接受以下类型：[ `Red | `Green]，[ `Red ]，[ `Green ]。
+
+您可以使用类型约束：
+
+- 类型定义
+- `let` 绑定
+- 参数定义
+
+对于后两者，您必须使用简写形式（无约束）。
+
+## 类型约束匹配什么?
+
+#### 下界
+
+让我们来看看下界 [> `Red | `Green] 通过使用它作为函数参数的类型 x：
+
+```ocaml
+let lower = (x: [> `Red | `Green]) => true;
+```
+
+可以接受的类型值 [`Red | `Green | `Blue] 和 [`Red | `Green]
+
+```ocaml
+# lower(`Red: [`Red | `Green | `Blue]);
+- : bool = true
+
+# lower(`Red: [`Red | `Green]);
+- : bool = true
+```
+
+然而，类型 [`Red] 的值不被接受，因为该类型不包含约束的两个构造函数。
+
+```ocaml
+# lower(`Red: [`Red]);
+错误：此表达式有类型 [ `Red ]
+但预期的表达类型 [> `Green | `Red]
+第一种变体类型不允许 tag(s) `Green
+```
+
+#### 上界
+
+下面的交互实验的上界 [< `Red | `Green]:
+
+```ocaml
+# let upper = (x: [< `Red | `Green]) => true;
+let uppder: ([< `Green | `Red ]) => bool = <fun>;
+
+# upper(`Red: [`Red | `Green]); /* OK */
+- : bool = true
+
+# upper(`Red: [`Red]); /* OK */
+- : bool = true
+
+# upper(`Red: [`Red | `Green | `Blue]);
+错误：此表达式有类型 [ `Blue | `Green | `Red ]
+但预期的表达类型 [< `Green | `Red ]
+第二种变体类型不允许 tag(s) `Blue 
+```
+
+## 推断的类型约束
+
+如果使用多态构造函数，ReasonML 将为您推断类型约束。我们来看几个例子。
+
+## 下界
+
+```ocaml
+# `Int(3);
+- : [> `Int(int) ] = `Int(3)
+```
+
+值 `Int(3) 具有推断类型 [> `Int(int) ] ，它与至少具有构造函数 `Int(int) 的所有类型兼容。
+
+使用元组，您可以得到两个单独的推断类型约束：
+
+```ocaml
+# (`Red, `Green);
+- : ([> `Red ], [> `Green ]) = (`Red, `Green)
+```
+
+另一方面，列表中的元素必须都具有相同的类型，这就是合并两个推断约束的原因：
+
+```ocaml
+# [`Red, `Green];
+- : list([> `Green | `Red ]) = [`Red, `Green]
+```
+
+只要预期类型是一个元素列表，其类型至少包含构造函数 `Red 和 `Green，就可以接受此列表。
+
+如果您尝试使用具有不同类型参数的相同构造函数，则会出现错误，因为 ReasonML 无法合并两个推断类型：
+
+```ocaml
+# [`Int(3), `Int("abc")];
+错误：此表达式具有类型字符串但是 预期类型为 int 的表达式
+```
+
+#### 上界
+
+到目前为止，我们只看到下界被推断。在以下示例中，ReasonML 推断参数 x 的上界：
+
+```ocaml
+let f = (x) => 
+    switch x {
+        | `Red => 1
+        | `Green => 2
+    };
+    /* let f: ([< `Green | `Red ]) => int = <fun>; */
+```
+
+由于 switch 表达式，f 最多可以处理两个构造函数 `Red 和 `Green。
+
+如果 f 返回其参数，则推断的类型变得更复杂：
+
+```ocaml
+let f = (x) => 
+    switch x {
+        | `Red => x
+        | `Green => x
+    };
+/* let f: (([< `Green | `Red ] as 'a)) => 'a = <fun>; */
+```
+
+类型参数 'a 用于表示参数的类型和结果的类型相同。
+
+如果我们使用 as 子句，情况就会改变，因为它们将输入类型与输出类型分离开来：
+
+```ocaml
+let f = (x) => 
+    switch x {
+        | `Red as r => r
+        | `Green as g => g
+    };
+
+/* let f: ([< `Green | `Red ]) => [> `Green | `Red ] = <fun>; */
+```
+
+#### ReasonML 的类型系统的限制
+
+有些事情超出了 ReasonML 的类型系统的能力：
+
+```ocaml
+let f = (x) => 
+    switch x {
+        | `Red => x
+        | `Green => `Blue
+    };
+/*
+错误：此表达式有类型 [> `Blue ]
+但预期的表达类型 [< `Green | `Red ]
+第二种变体类型不允许 tag(s) `Blue
+*/
+```
+
+f 的返回类型是：“ x 的类型或类型 [> `Blue] ”。但是，无法通过约束来表达这一点。
+
+#### 更复杂的约束
+
+类型约束可能变得相当复杂。我们从两个简单的函数开始：
+
+```ocaml
+let even1 = (x) =>
+    switch x {
+        | `Data(n) => (n mod 2) == 0
+    };
+/*
+let even1: ([< `Data(int) ]) => bool = <fun>;
+*/
+
+let even2 = (x) =>
+    switch x {
+        | `Data(s) => (String.length(s) mod 2) == 0
+    };
+
+/* let even2: ([< `Data(string) ]) => bool = <fun>; */
+
+```
+
+这两种推断类型都包含由 switch 语句引起的上界。
+
+我们使用相同的变量 `x` 作为两个函数的参数：
+
+```ocaml
+let even = (x) => even1(x) && even2(x);
+/* let even: ([< `Data(string & int)]) => bool = <fun>; */
+```
+
+对于 `x` 类型，ReasonML会合并以下两种类型：
+
+```ocaml
+[< `Data(int) ]
+[< `Data(string) ]
+```
+
+结果包含以下构造函数。
+
+```ocaml
+`Data(string & int)
+```
+
+它代表“构造函数 `Data ”，其类型参数既有 `string` 类型又有 `int` 类型。这样的构造函数不存在，这意味着你不能调用 `even()`，因为没有与其参数类型兼容的值。
+
+## 类型推断使用统一（这是双向的）
+
+当 ReasonML 通过推理计算类型，并确定两个类型 `t1`，`t2` 必须相等（例如实际参数的类型和形式参数的类型）时，它使用统一来求解方程 `t1 = t2`。
+
+我将通过几个函数来演示。每个函数都返回唯一的参数。它为参数指定的类型 tp 与它为结果指定的类型 tr 不同。 ReasonML 将尝试统一 tp 和 tr，让我们观察到统一是双向的。
+
+#### 两个约束
+
+如果参数类型和结果类型都是约束，则 ReasonML 会尝试合并约束。
+
+```ocaml
+# let f = (x: [>`Red]): [`Red | `Green] => x;
+let f: ([`Green | `Red]) => [`Green | `Red] = <fun>;
+# let f = (x: [`Red]): [< `Red | `Green] => x;
+let f: ([ `Red ]) => [ `Red ] = <fun>;
+
+```
+
+## 两种单形类型
+
+如果两种类型都是单形的，那么它们必须具有相同的构造函数。
+
+```ocaml
+# let f = (x: [`Red]): [`Red | `Green] => x;
+错误：此表达式具有类型 [`Red]
+但预期的表达类型 [ `Green | `Red ]
+第一种变体类型不允许 tag(s) `Green
+
+# let f = (x: [`Red | `Green]): [`Red | `Green] => x;
+let f: ([`Green | `Red ])  => [`Green | `Red ] = <fun>;
+```
+
+## 单形类型与约束
+
+单形态和约束之间的区别的另一个证明。考虑以下两个功能：
+
+```ocaml
+type rgb = [`Red | `Green | `Blue];
+
+let id1 = (x: rgb) => x'
+/* let id1: (rgb) => rgb = <fun>; */
+
+let id2 = (x:[> rgb]) => x;
+/* let id2: (([> rgb ] as 'a)) => 'a = <fun>; */
+```
+
+我们来比较这两个函数：
+
+- id1() 有一个参数，其类型 rgb 是单形的（它没有类型变量）。
+- id2() 有一个参数，其类型 [> rgb] 是一个约束。定义本身看起来不是多态的，但计算出的签名确实存在 - 现在有一个类型变量 'a。
+
+让我们来看看如果我们用参数的类型是一个新的多态变量来调用这些函数会发生什么，该变量具有与 rgb 相同的构造函数：
+
+```ocaml
+type c3 = [ `Blue | `Green | `Red ];
+```
+
+使用id1()，x 的类型以及结果是固定的。也就是说，它保持 rgb ：
+
+```ocaml
+# id1(`Red: c3);
+- : rgb = `Red
+```
+
+我们只能调用id1()，因为 rgb 和 c3 是相同的。
+
+相反，使用id2()，x 的类型是多态的，并且更加灵活。统一时，'a 必然会 c3。函数调用的结果是类型 c3（'a 的值）。
+
+```ocaml
+# id2(`Red: c3);
+- : c3 = `Red
+```
+
+## 资料
+
+多态变体以及如何使用它们：
+
+- OCaml手册中的“[多态变体](http://caml.inria.fr/pub/docs/manual-ocaml/lablexamples.html#sec46)” 章节。
+- [Daniel Bünzli关于何时使用多态变体的技巧](https://stackoverflow.com/questions/9367181/variants-or-polymorphic-variants/9367778#9367778)（Stack Overflow）
+- [通过多态变体重复使用代码](https://www.math.nagoya-u.ac.jp/~garrigue/papers/fose2000.html) Jacques Garrigue（2000）。
+
+类型变量约束：
+
+- [OCaml中的“constraint”关键字可以做什么？](https://stackoverflow.com/questions/24490648/what-can-be-done-with-the-constraint-keyword-in-ocaml)（Stack Overflow）
+- [为什么约束子句存在于类型定义中？](https://www.reddit.com/r/ocaml/comments/1ss987/why_does_the_constraint_clause_exist_in_type/)
+- 张宏波 “OCaml书”中的“[多态变体](https://github.com/bobzhang/ocaml-book/blob/master/lang/features.org)”章节。
+- OCaml手册中的“[类型定义](https://caml.inria.fr/pub/docs/manual-ocaml/typedecl.html)”章节。
+
+多态变体的语义：
+
+- [结构多态性的简单类型推断](http://caml.inria.fr/pub/papers/garrigue-structural_poly-fool02.pdf)[PDF] Jacques Garrigue （2000）。
+- [行多态性](https://www.cl.cam.ac.uk/teaching/1415/L28/rows.pdf)[PDF]  Leo White （2015）。
