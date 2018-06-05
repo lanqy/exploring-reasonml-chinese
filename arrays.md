@@ -12,7 +12,7 @@
 
 下表比较列表和数组。
 
- | 列表 | 数组
+     | 列表 | 数组
 ------------ | ------------- | ------------- 
 大小 | 小-中 | 小-大
 可调整大小？ | 灵活 | 固定
@@ -259,7 +259,7 @@ let filterArray = (~f, arr) =>
     |> ListLabels.filter(~f)
     |> ArrayLabels.of_list;
  ```
- 
+
 `filterArray()` 在使用中：
 
 ```ocaml
