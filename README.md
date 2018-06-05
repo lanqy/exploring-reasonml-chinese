@@ -17,3 +17,4 @@ exploring reasonml 翻译
 - [基本模块](basic-modules.md)
 - [变体类型](variants.md)
 - [多态变体类型](polymorphic-variants.md)
+- [列表](lists.md)
