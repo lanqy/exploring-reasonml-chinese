@@ -19,3 +19,7 @@ exploring reasonml 翻译
 - [多态变体类型](polymorphic-variants.md)
 - [列表](lists.md)
 - [数组](arrays.md)
+- [记录](records.md)
+- [函子](functors.md)
+- [递归](recursion.md)
+- [阅读扩展](read-next.md)
