@@ -552,3 +552,262 @@ l1 @ l2 @ l3
 # ListLabels.flatten([1, 2], [], [3, 4, 5]);
 - : list(int) = [1, 2, 3, 4, 5]
 ```
+
+如果您想知道任意嵌套的列表，请回想一下，在 ReasonML 中，所有元素必须具有相同的类型。因此，如果一个列表元素本身就是一个列表，那么所有元素都必须是列表：
+
+```ocaml
+# ListLabels.flatten([[1,[2]],[],[3]]);
+错误：该表达式具有类型 list('a) 
+但预期类型为int的表达式
+
+# ListLabels.flatten([[[1],[2]], [],[[3]]]);
+- : list(list(int)) = [[1], [2], [3]]
+```
+
+让我们继续查看 `flatten()` 的用例。
+
+#### 用例：同时进行过滤和映射
+
+`flatten()` 允许您同时过滤和映射。作为例子，考虑试图提取存储在列表中的多个列表的第一个元素。你可以：
+
+- 首先通过 `ListLabels.filter()` 过滤出空列表（没有第一个元素）。
+- 然后通过 `ListLabels.map()` 将每个非空列表映射到其头部。
+
+或者你可以同时使用扁平化和两种方法：
+
+```ocaml
+module L = ListLabels;
+
+let listFromHead = (l: list('a)) => 
+    switch (l) {
+        | [] => []
+        | [head, ..._] => [head]
+    };
+let heads = (l: list((list('a)))) => 
+    L.flatten(L.map(~f=listFromHead, l));
+```
+
+首先，我们将每个非空列表映射到一个列表中，并将其头部和每个空列表映射到一个空列表。然后我们把结果弄平。这看起来如下：
+
+```ocaml
+# let l0 = [[1,2], [], [3, 4, 5]];
+let l0: list(list(int)) = [[1, 2], [], [3, 4, 5]];
+
+# L.map(~f=listFromHead, l0);
+- : list(list(int)) = [[1], [], [3]]
+# let l1 = L.map(~f=listFromHead, l0);
+let l1: list(list(int)) = [[1], [], [3]];
+
+# L.flatten(l1);
+- : list(int) = [1, 3]
+```
+
+这些步骤相当于：
+
+```ocaml
+# heads([[1, 2], [], [3, 4, 5]]);
+- : list(int) = [1, 3]
+```
+
+将 `listFromHead` 与使用 `option` 表示失败的函数 `getHead` 进行比较是有益的：
+
+```ocaml
+let getHead = (l: list('a)) => 
+    switch (l) {
+        | [] => None
+        | [head, ..._] => Some(head)
+    };
+```
+
+也就是说， `None` 表示“l 没有头”：
+
+```ocaml
+# getHead(["a", "b"]);
+- : option(string) = Some("a")
+# getHead([1, 2, 3])
+- : option(int) = Some(1)
+
+# getHead([]);
+- : option('a) = None
+
+```
+
+使用 `listFromHead` ，我们使用空列表代替 `None` 和使用一个元素列表代替 `Some` 。
+
+#### 用例：映射到多个值
+
+假设我们已经创建了一个人和他们的孩子的列表：
+
+```ocaml
+type person = Person(string, list(string));
+
+let person = [
+    Person("Daisy", []),
+    Person("Della", ["Huey", "Dewey", "Louie"]),
+    Person("Marcus", ["Minnie"])
+];
+
+```
+
+如果我们想收集列表中的孩子，`ListLabels.map()` 几乎给了我们我们想要的，但不是很：
+
+```ocaml
+# ListLabels.map(~f=(Person(_, ch)) => ch, persons);
+- : list(list(string)) = [[], ["Huey", "Dewey", "Louie"], ["Minnie"]]
+```
+
+唉，这是一串字符串列表，而不是字符串列表。我们可以通过将 `ListLabels.flatten()` 应用于此嵌套列表来解决此问题：
+
+```ocaml
+let collectChildren = (persons: list(person)) =>
+    ListLabels.flatten(ListLabels.map(~f=(Person(_, children)) => children, persons));
+
+collectChildren(persons);
+/* ["Huey", "Dewey", "Louie", "Minnie"] */
+```
+
+现在我们得到期望的结果：
+
+```ocaml
+# collectChildren(persons);
+- : list(string) = ["Huey", "Dewey", "Louie", "Minnie"]
+```
+
+#### 用例：有条件地插入值
+
+有时，根据条件创建一些列表，其中添加或省略了一些元素（以下示例中的 `cond` ）：
+
+```ocaml
+let func = (cond: bool) => ListLabels.flatten([
+    if (cond) ["a"] else [],
+    [
+        "b",
+        "c"
+    ]
+]);
+```
+
+这是如何使用 `func()` 的：
+
+```ocaml
+# func(true);
+- : list(string) = ["a", "b", "c"]
+
+# func(false);
+- : list(string) = ["b", "c"]
+
+```
+
+#### ListLabels.fold_left()
+
+签名：
+
+```ocaml
+let fold_left: (~f: ('a, 'b) => 'a, ~init: 'a, list('b)) => 'a;
+```
+
+`fold_left()` 的工作原理如下：
+
+- 输入：类型 `list('b)`（最后一个参数）
+- 结果：类型 `'a` 的值
+
+为了计算结果，`fold_left()` 取决于它的参数函数 `~f` 。它为其输入列表的每个元素 `elem` 调用 `~f`：
+
+```ocaml
+let nextIntermediateResult = f(intermediateResult, elem);
+```
+
+`intermediateResult` 是已经计算好的。第一个中间结果是 `~init` 。最后一个 `nextIntermediateResult` 是`fold_left()` 的结果。
+
+我们来看一个具体的例子。
+
+#### fold_left() 举例：summarize()
+
+我们已经遇到过函数 `summarize()`，它计算了一个 `int` 列表的总数。让我们通过 `fold_left()` 来实现该功能：
+
+```ocaml
+let rec summarize = (l: list(int)) => 
+    ListLabels.fold_left(~f = (r, elem) => r + elem, ~init=0, l);
+```
+
+要理解 `summarize()` 的工作方式，请考虑以下表达式：
+
+```ocaml
+summarize([1, 2, 3]) /* 6 */
+```
+
+为了计算结果6，采取以下步骤：
+
+```ocaml
+/* 参数 */
+let f = (r, elem) => r + elem;
+let init = 0;
+
+/* 步骤 */
+let result0 = f(init, 1); /* 1 */
+let result1 = f(result0, 2) /* 3 */
+let result2 = f(result1, 3) /* 6 */
+
+```
+
+`result2` 是 `fold_left()` 的结果。
+
+#### 另一种查看 fold_left() 的方法
+
+另一种查看 `fold_left()` 的方法是将二元运算符 `~f` 转换为列表的 `n` 元运算符。数学中从二元到 `n` 元的例子是二元算子 `+` 也存在为 `n` 元版本（算子 `Σ` ）。`summarize()` 从 `+` 到 `Σ` 。它也可以这样写：
+
+```ocaml
+# ListLabels.fold_left(~f=(+), ~init=0, [1, 2, 3]);
+- : int = 6
+```
+
+我发现 `fold_left` 最容易理解，如果它在这种模式下工作 - 一个可交换的 `~f`（参数顺序无关紧要）。但是你可以用它做很多事情 - 看一个例子。
+
+#### 一个更复杂的例子：查找值
+
+函数 `contains()` 使用它在列表中查找值：
+
+```ocaml
+let contains = (~value: 'a, theList: list('a)) => {
+    let f = (found, elem) => found || elem == value;
+    fold_left(~f, ~init=false, theList);
+};
+```
+
+通过 `iteri()` 将列表转换为数组
+
+签名：
+
+```ocaml
+let iteri: (~f: (int, 'a) => unit, list('a)) => unit;
+```
+
+`iteri()` 为列表的每个元素调用 `~f` 。参数是元素和元素的索引。它返回 `unit` ，这意味着任何有用的 iteri，它会产生副作用。
+
+以下函数使用 `iteri()` 来填充数组。它通过写入数组 `arr` 来做为副作用：
+
+```ocaml
+let arrayFromList = (~init: 'a, l: list('a)) => {
+    let arr = ArrayLabels.make(ListLabels.length(l), init);
+    ListLabels.iteri(~f=(i, x) => arr[i] = x, l);
+    arr;
+};
+```
+
+`~init` 是一个必需的参数，因为 `make()` 需要它（为什么稍后解释）。
+
+`arrayFromList()` 用法
+
+```ocaml
+# arrayFromList(~init=0, [1, 2, 3]);
+- : array(int) = [| 1, 2, 3 |]
+```
+
+## 接下来要阅读的内容
+
+现在是阅读本书中关于递归的章节的好时机。它会让你更深入地理解递归，并告诉你如何使本章的代码更有效率（通过尾部调用）。
+
+
+
+
+
