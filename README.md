@@ -1,5 +1,6 @@
 # exploring-reasonml-chinese
-exploring reasonml 翻译
+
+> exploring reasonml 翻译
 
 # 探索 ReasonML
 
@@ -22,4 +23,4 @@ exploring reasonml 翻译
 - [记录](records.md)
 - [函子](functors.md)
 - [递归](recursion.md)
-- [阅读扩展](read-next.md)
+- [接下来要读什么？](read-next.md)
