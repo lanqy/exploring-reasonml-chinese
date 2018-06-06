@@ -13,7 +13,7 @@ ReasonML 还很年轻，但由于它基于 OCaml，所以在该语言中有很�
     - BuckleScript 具有其 [API](https://bucklescript.github.io/bucklescript/api/) 的单独页面。
 - JavaScript-ReasonML 互操作：
     - [BuckleScript 的手册](https://bucklescript.github.io/docs/en/installation.html)是全面的。
-- ReactReason拥有自己的网站，其中包含更多[文档](https://reasonml.github.io/reason-react/)。 
+- ReactReason 拥有自己的网站，其中包含更多[文档](https://reasonml.github.io/reason-react/)。 
 
 其他信息来源：
 
