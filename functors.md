@@ -4,7 +4,7 @@
 
 > 直观上，函子是一个函数，它将一个或多个模块作为输入并返回一个新模块。本章介绍仿函数的工作原理以及为什么它们有用。
 
-这些例子的代码可以在 GitHub上的 repository [reasonml-demo-functors](https://github.com/rauschma/reasonml-demo-functors) 中找到。
+这些例子的代码可以在 GitHub 上的 repository [reasonml-demo-functors](https://github.com/rauschma/reasonml-demo-functors) 中找到。
 
 注：函子是一个高级主题。你最初可能不知道如何编写它们。我解释了在别处需要时使用它们的基本知识。
 
@@ -127,7 +127,7 @@ module RepetitionThree = Repetition.Make({
 
 #### 模块 Repetition 的结构
 
-我们拥有结构化模块Repetition的方式是使用函子的常用模式。它有以下几部分：
+我们拥有结构化模块 Repetition 的方式是使用函子的常用模式。它有以下几部分：
 
 - Make：函子。
 - Make 的参数的一个或多个接口（在我们的例子中为 `Count` ）。
@@ -376,7 +376,7 @@ StringSet.(elements(diff(set1, set2)));
   /* list(string) = ["a"] */
 ```
 
-方便起见，ReasonML的标准库带有一个模块 `String` ，它作为 `Set.Make` 的一个参数，因为它同时具有 `String.t` 和 `String.compare` 。因此，我们也可以写下：
+方便起见， ReasonML 的标准库带有一个模块 `String` ，它作为 `Set.Make` 的一个参数，因为它同时具有 `String.t` 和 `String.compare` 。因此，我们也可以写下：
 
 ```ocaml
 module StringSet = Set.Make(String);
