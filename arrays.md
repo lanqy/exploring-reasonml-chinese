@@ -1,7 +1,5 @@
 # 数组
 
-译自：http://reasonmlhub.com/exploring-reasonml/ch_arrays.html
-
 > 在本章中，我们看看 ReasonML 数据结构数组。
 
 数组是具有随机访问的可变数据结构，其元素都具有相同的类型。它特别适合大量数据，并且随时随地访问。
@@ -266,3 +264,4 @@ let filterArray = (~f, arr) =>
 # filterArray(~f=x => x > 0, [|-2, 3, -4, 1|]);
 - : array(int) = [| 3, 1|]
 ```
+

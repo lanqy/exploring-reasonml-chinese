@@ -1,7 +1,5 @@
 # 函子（高级）
 
-译自：http://reasonmlhub.com/exploring-reasonml/ch_functors.html
-
 > 直观上，函子是一个函数，它将一个或多个模块作为输入并返回一个新模块。本章介绍仿函数的工作原理以及为什么它们有用。
 
 这些例子的代码可以在 GitHub 上的 repository [reasonml-demo-functors](https://github.com/rauschma/reasonml-demo-functors) 中找到。

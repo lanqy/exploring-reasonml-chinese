@@ -1,7 +1,5 @@
 # 递归
 
-译自：http://reasonmlhub.com/exploring-reasonml/ch_recursion.html
-
 > 在本章中，我们看看函数式编程中的一个重要技术：递归。
 
 ## 所需的知识

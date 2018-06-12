@@ -1,15 +1,12 @@
 # ReasonML 计划做什么？
 
-本章简要介绍一些仍在研究中的 [ReasonML](https://reasonml.github.io/) 关键部分：
+> 本章简要介绍一些仍在研究中的 [ReasonML](https://reasonml.github.io/) 关键部分：
 
 - 更好地支持编写与 JavaScript Promises 兼容的异步代码。
     - 一种选择是提供特殊的语法（请参阅 [GitHub上的问题](https://github.com/BuckleScript/bucklescript/issues/1326) ）。
     - 另一种选择是向 OCaml 的并发库 [Lwt](https://github.com/ocsigen/lwt) （它是其中一个分支）添加支持。
-
 - 更好地支持多态。目前，不同类型表示 ReasonML 的不同功能或操作员名称（例如，有整数有 `+` 和 浮点数 `+.` ）。Haskell 有解决这个问题的类型类。正在为 OCaml（因此 ReasonML ）开发类似的方法：[模块化含义](http://ocamllabs.io/doc/implicits.html)。
-
 - 一个更好的标准库。这方面正在探索许多事情（参见 github 仓库 [reasonml-community/belt](https://github.com/reasonml-community/belt) ）。OCaml 在这里存在相当多的碎片，因此标准化将受到欢迎。
-
 - 更好地支持 Unicode。目前，OCaml 不支持 Unicode，OCaml 字符的大小为 8 位。您可以通过 BuckleScript 的自定义字符串文字（编译为 JavaScript 字符串）获得一些 Unicode 支持：
 
 ```ocaml

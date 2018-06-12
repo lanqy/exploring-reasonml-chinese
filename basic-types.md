@@ -1,6 +1,6 @@
 # 基本值和类型
 
-在本章中，我们将看看 ReasonML 对布尔值，整数，浮点数，字符串，字符和单位类型的支持。我们还会看到一些操作符的例子。
+> 在本章中，我们将看看 ReasonML 对布尔值，整数，浮点数，字符串，字符和单位类型的支持。我们还会看到一些操作符的例子。
 
 为了探索，我们将使用交互式RationalML命令行rtop，它是包 reason-cli 的一部分（[文档解释如何安装它](https://reasonml.github.io/docs/en/global-installation.html)）。
 

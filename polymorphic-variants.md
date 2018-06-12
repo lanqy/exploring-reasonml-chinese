@@ -1,8 +1,6 @@
 # 多态变体类型
 
-译自：http://reasonmlhub.com/exploring-reasonml/ch_polymorphic-variants.html
-
-在本章中，我们看看多态变体，这是一个更灵活的正常变体版本。但这种灵活性也使得它们更加复杂。
+> 在本章中，我们看看多态变体，这是一个更灵活的正常变体版本。但这种灵活性也使得它们更加复杂。
 
 ## 什么是多态变体？
 

@@ -1,4 +1,4 @@
-# ReasonML 常问问题
+# ReasonML 常见问题
 
 ## BuckleScript中的 Str 模块在哪里？
 

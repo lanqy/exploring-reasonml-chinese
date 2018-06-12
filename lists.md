@@ -1,7 +1,5 @@
 # 列表
 
-译自：http://reasonmlhub.com/exploring-reasonml/ch_lists.html
-
 > 在本章中，我们看看 ReasonML数据结构列表。
 
 列表是一系列元素的不可变数据结构，它们都具有相同的类型。它特别适合通过模式匹配进行处理。

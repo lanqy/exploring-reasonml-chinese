@@ -7,11 +7,8 @@
 有两件事要安装：
 
 - bs-platform：安装 BuckleScript 并使您能够将 ReasonML 编译为 JavaScript。 [ReasonML 文档](https://reasonml.github.io/docs/en/quickstart-javascript.html)中描述了安装。
-
 - reason-cli：需要在编辑器中支持 ReasonML ，但也包含各种工具，包括交互式 ReasonML 命令行 `rtop` 。 [ReasonML 文档](https://reasonml.github.io/docs/en/global-installation.html)中描述了安装。编辑器支持由两部分提供：
-
     - 一方面，所谓的[语言服务器](https://github.com/Microsoft/language-server-protocol)提供了处理 ReasonML 代码的服务。
-
     - 另一方面，编辑器插件和类似的扩展机制与服务器通信以提供实际的支持。
 
 ## 快速尝试 ReasonML
@@ -51,5 +48,4 @@ Reason # 3 + 4;
 鉴于与 ReasonML 相关的大多数材料都使用 OCaml 的语法，因此能够从 OCaml 的语法转换为 ReasonML 是非常有用的。有两种方法可以这样做：
 
 - 在线运行环境 （ playground ） “[试试 Reason](https://reasonml.github.io/en/try.html)”。
-
 - 工具 refmt（“ ReasonML 格式化工具”）是 reason-cli 的一部分。通过 refmt --help 获取文档。
